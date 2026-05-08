@@ -1,10 +1,6 @@
 # OptoStim2P
 
-OptoStim2P is a PyQt5 desktop tool for two-photon optogenetic stimulation workflows. It supports stimulation-site registration, XY/Z alignment, single-cell preview, automated stimulation control, and post-stimulation activation checks.
-
-## Microscope Software
-
-OptoStim2P is designed for use with Olympus microscope software, specifically the Olympus FV31S-SW workflow used in our experiments.
+OptoStim2P is a PyQt5 desktop tool for two-photon optogenetic stimulation workflows. It has been tested with Olympus FV31S-SW microscope software and supports stimulation-site registration, XY/Z alignment, single-cell preview, automated stimulation control, and post-stimulation activation checks.
 
 ## Developers
 
