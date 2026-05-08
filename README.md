@@ -1,39 +1,43 @@
 # OptoStim2P
 
-OptoStim2P is a PyQt5 desktop tool for two-photon stimulation workflows. It provides stimulation control, XY/Z registration utilities, live/reference ROI preview, post-stimulation activation checks, and PyAutoGUI-based interaction with microscope software.
+OptoStim2P is a PyQt5 desktop tool for two-photon optogenetic stimulation workflows. It supports stimulation-site registration, XY/Z alignment, single-cell preview, automated stimulation control, and post-stimulation activation checks.
 
-## Current Entry Point
+## Microscope Software
 
+OptoStim2P is designed for use with Olympus microscope software, specifically the Olympus FV31S-SW workflow used in our experiments.
+
+## Developers
+
+Developed by Qiyuan Liang and Ming Zhao at Shenzhen Bay Laboratory.
+
+## Current Version
+
+- App version: `OptoStim2P v5.1.2`
 - Main source file: `V5.1.2.py`
-- App title: `OptoStim2P v5.1.2`
 - Default settings file: `app_settings.json`
 
-## Recommended Environment
-
-The current Windows build has been tested with a PyQt5 conda environment similar to:
-
-```powershell
-D:\anaconda3\envs\pyqt5\python.exe
-```
-
-Required packages include PyQt5, numpy, opencv-python, matplotlib, tifffile, pynput, pyautogui, pyperclip, and PyInstaller for packaging.
-
 ## Run From Source
+
+The current source version is developed and tested on Windows with a PyQt5 conda environment.
 
 ```powershell
 D:\anaconda3\envs\pyqt5\python.exe F:\Code\OptoStim\V5.1.2.py
 ```
 
-## Syntax Check
+Core dependencies include PyQt5, numpy, opencv-python, matplotlib, tifffile, pynput, pyautogui, and pyperclip.
 
-```powershell
-D:\anaconda3\envs\pyqt5\python.exe -m py_compile F:\Code\OptoStim\V5.1.2.py
+## Windows Release
+
+Packaged Windows builds are distributed through GitHub Releases instead of being committed to the source repository.
+
+Download the release zip, extract the full folder, and run:
+
+```text
+OptoStim2P_v5.1.2.exe
 ```
 
-## Package Windows Exe
+Do not run the executable directly from inside the zip archive. The full extracted folder is required because the Windows build uses a PyInstaller onedir layout.
 
-```powershell
-D:\anaconda3\envs\pyqt5\python.exe -m PyInstaller --noconfirm --clean OptoStim2P_v5.1.2.spec
-```
+## Developer Notes
 
-The generated `build/` and `dist/` folders are intentionally ignored by Git. Publish packaged executables through GitHub Releases rather than committing them to the source repository.
+`build/`, `dist/`, local manuals, caches, screenshots, and packaged binaries are intentionally ignored by Git. Source changes should be committed separately from release artifacts.
