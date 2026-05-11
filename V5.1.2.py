@@ -702,6 +702,34 @@ class GuardedComboBox(WheelFocusMixin, QComboBox):
         popup_view.setLineWidth(0)
         popup_view.setMidLineWidth(0)
         popup_view.setUniformItemSizes(True)
+        popup_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        popup_view.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        popup_view.viewport().setObjectName("comboPopupViewport")
+        popup_view.setStyleSheet("""
+            QListView#comboPopupView, QListView#comboPopupView::viewport {
+                background-color: #18212b;
+                border: 0px;
+                outline: 0px;
+            }
+            QListView#comboPopupView::item {
+                min-height: 24px;
+                padding: 4px 8px;
+                border: 0px;
+                background-color: #18212b;
+                color: #e8eef5;
+            }
+            QListView#comboPopupView::item:hover,
+            QListView#comboPopupView::item:selected {
+                background-color: #17354a;
+                border: 0px;
+                color: #e8eef5;
+            }
+            QScrollBar:horizontal {
+                height: 0px;
+                background: transparent;
+                border: 0px;
+            }
+        """)
         self.setView(popup_view)
 
 
@@ -3758,6 +3786,11 @@ class AdvancedCalibrationGUI(QWidget):
             outline: 0;
             padding: 4px 0px;
         }}
+        QListView#comboPopupView::viewport {{
+            background-color: {panel};
+            border: none;
+            outline: 0;
+        }}
         QListView#comboPopupView::item {{
             min-height: 24px;
             padding: 4px 8px;
@@ -3768,6 +3801,11 @@ class AdvancedCalibrationGUI(QWidget):
         QListView#comboPopupView::item:selected {{
             background-color: {accent_soft};
             color: {text};
+            border: none;
+        }}
+        QListView#comboPopupView QScrollBar:horizontal {{
+            height: 0px;
+            background: transparent;
             border: none;
         }}
         QSpinBox::up-button, QSpinBox::down-button,
