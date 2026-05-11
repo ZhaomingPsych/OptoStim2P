@@ -733,6 +733,63 @@ class GuardedComboBox(WheelFocusMixin, QComboBox):
         self.setView(popup_view)
 
 
+class SegmentedOptionControl(QWidget):
+    currentIndexChanged = pyqtSignal(int)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("segmentedOptionControl")
+        self._items = []
+        self._buttons = []
+        self._current_index = -1
+        self._layout = QHBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(2)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+    def addItems(self, items):
+        for item in items:
+            self.addItem(item)
+
+    def addItem(self, text):
+        index = len(self._items)
+        self._items.append(text)
+        button = QPushButton(text)
+        button.setCheckable(True)
+        button.setProperty("segmentedButton", "true")
+        button.setMinimumHeight(32)
+        button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        button.clicked.connect(lambda checked=False, i=index: self.setCurrentIndex(i))
+        self._buttons.append(button)
+        self._layout.addWidget(button)
+        if self._current_index < 0:
+            self.setCurrentIndex(0)
+
+    def findText(self, text):
+        try:
+            return self._items.index(text)
+        except ValueError:
+            return -1
+
+    def currentText(self):
+        if 0 <= self._current_index < len(self._items):
+            return self._items[self._current_index]
+        return ""
+
+    def currentIndex(self):
+        return self._current_index
+
+    def setCurrentIndex(self, index):
+        if index < 0 or index >= len(self._items) or index == self._current_index:
+            return
+        self._current_index = index
+        for i, button in enumerate(self._buttons):
+            button.setChecked(i == index)
+            button.style().unpolish(button)
+            button.style().polish(button)
+        self.currentIndexChanged.emit(index)
+
+
 class ElidedLabel(QLabel):
     def __init__(self, text="", parent=None):
         super().__init__(parent)
@@ -2220,13 +2277,13 @@ class DetectionPage(QWidget):
         grid.setHorizontalSpacing(10)
         grid.setVerticalSpacing(10)
 
-        self.eval_method_combo = GuardedComboBox()
+        self.eval_method_combo = SegmentedOptionControl()
         self.eval_method_combo.addItems(["Fold Increase", "Difference"])
         parent_method = getattr(self.parent(), "detection_method", "Fold Increase")
         method_index = self.eval_method_combo.findText(parent_method)
         if method_index >= 0:
             self.eval_method_combo.setCurrentIndex(method_index)
-        self.detection_channel_combo = GuardedComboBox()
+        self.detection_channel_combo = SegmentedOptionControl()
         self.detection_channel_combo.addItems(["PAGFP", "PAmCherry"])
         parent_channel = getattr(self.parent(), "detection_channel", "PAGFP")
         channel_index = self.detection_channel_combo.findText(parent_channel)
@@ -3835,6 +3892,29 @@ class AdvancedCalibrationGUI(QWidget):
         }}
         QPushButton[role="secondary"] {{
             background-color: #1d2833;
+        }}
+        QWidget#segmentedOptionControl {{
+            background-color: {surface};
+            border: none;
+            border-radius: 10px;
+            padding: 2px;
+        }}
+        QWidget#segmentedOptionControl QPushButton[segmentedButton="true"] {{
+            background-color: transparent;
+            border: none;
+            border-radius: 8px;
+            min-height: 28px;
+            padding: 4px 10px;
+            color: {muted};
+            font-weight: 600;
+        }}
+        QWidget#segmentedOptionControl QPushButton[segmentedButton="true"]:hover {{
+            background-color: #13202a;
+            color: {text};
+        }}
+        QWidget#segmentedOptionControl QPushButton[segmentedButton="true"]:checked {{
+            background-color: {accent_soft};
+            color: #f1fbff;
         }}
         QPushButton[role="primary"] {{
             background-color: {accent_soft};
