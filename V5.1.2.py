@@ -134,6 +134,8 @@ ZH_TO_EN = {
     "Gamma变换阈值:": "Gamma Threshold:",
     "pyautogui 延迟 (ms):": "pyautogui Delay (ms):",
     "激活检测": "Activation Check",
+    "检测通道:": "Detection Channel",
+    "检测通道": "Detection Channel",
     "显示/图像": "Display / Image",
     "自动化": "Automation",
     "位置测试": "Position Test",
@@ -2196,6 +2198,12 @@ class DetectionPage(QWidget):
         method_index = self.eval_method_combo.findText(parent_method)
         if method_index >= 0:
             self.eval_method_combo.setCurrentIndex(method_index)
+        self.detection_channel_combo = GuardedComboBox()
+        self.detection_channel_combo.addItems(["PAGFP", "PAmCherry"])
+        parent_channel = getattr(self.parent(), "detection_channel", "PAGFP")
+        channel_index = self.detection_channel_combo.findText(parent_channel)
+        if channel_index >= 0:
+            self.detection_channel_combo.setCurrentIndex(channel_index)
 
         self.load_pre_btn = QPushButton("刺激前图像")
         self.load_post_btn = QPushButton("刺激后图像")
@@ -2215,37 +2223,45 @@ class DetectionPage(QWidget):
         grid.addWidget(self.pre_activation_label, 1, 0, 1, 2)
         grid.addWidget(self.post_activation_label, 1, 2, 1, 2)
 
-        grid.addWidget(QLabel("细胞直径(px):"), 2, 0)
+        grid.addWidget(QLabel("激活检测"), 2, 0)
+        grid.addWidget(self.eval_method_combo, 2, 1)
+
+        grid.addWidget(QLabel("检测通道:"), 2, 2)
+        grid.addWidget(self.detection_channel_combo, 2, 3)
+
+        grid.addWidget(QLabel("细胞直径(px):"), 3, 0)
         self.diameter_input = GuardedDoubleSpinBox()
         self.diameter_input.setRange(1, 100)
         self.diameter_input.setDecimals(2)
         self.diameter_input.setValue(12.0)
-        grid.addWidget(self.diameter_input, 2, 1)
+        grid.addWidget(self.diameter_input, 3, 1)
 
         self.threshold_label = QLabel("Fold Change阈值:")
-        grid.addWidget(self.threshold_label, 2, 2)
+        grid.addWidget(self.threshold_label, 3, 2)
         self.threshold_input = GuardedDoubleSpinBox()
         self.threshold_input.setDecimals(2)
         self.threshold_input.setValue(1.4)
-        grid.addWidget(self.threshold_input, 2, 3)
+        grid.addWidget(self.threshold_input, 3, 3)
 
-        grid.addWidget(QLabel("X位移(Post)"), 3, 0)
+        grid.addWidget(QLabel("X位移(Post)"), 4, 0)
         self.activation_correction_x = GuardedDoubleSpinBox()
         self.activation_correction_x.setRange(-50, 50)
         self.activation_correction_x.setDecimals(2)
         self.activation_correction_x.setSingleStep(0.1)
         self.activation_correction_x.setValue(0.0)
-        grid.addWidget(self.activation_correction_x, 3, 1)
+        grid.addWidget(self.activation_correction_x, 4, 1)
 
-        grid.addWidget(QLabel("Y位移(Post)"), 3, 2)
+        grid.addWidget(QLabel("Y位移(Post)"), 4, 2)
         self.activation_correction_y = GuardedDoubleSpinBox()
         self.activation_correction_y.setRange(-50, 50)
         self.activation_correction_y.setDecimals(2)
         self.activation_correction_y.setSingleStep(0.1)
         self.activation_correction_y.setValue(0.0)
-        grid.addWidget(self.activation_correction_y, 3, 3)
+        grid.addWidget(self.activation_correction_y, 4, 3)
 
         for widget in (
+            self.eval_method_combo,
+            self.detection_channel_combo,
             self.diameter_input,
             self.threshold_input,
             self.activation_correction_x,
@@ -2267,13 +2283,16 @@ class DetectionPage(QWidget):
         action_button_layout.setSpacing(10)
         action_button_layout.addWidget(self.auto_correct_btn)
         action_button_layout.addWidget(self.evaluate_btn)
-        grid.addLayout(action_button_layout, 4, 0, 1, 4)
+        grid.addLayout(action_button_layout, 5, 0, 1, 4)
 
         self.load_pre_btn.clicked.connect(self.load_pre_activation_image)
         self.load_post_btn.clicked.connect(self.load_activation_image)
         self.eval_method_combo.currentIndexChanged.connect(self.update_threshold_settings)
+        self.eval_method_combo.currentIndexChanged.connect(self.sync_detection_controls_to_parent)
+        self.detection_channel_combo.currentIndexChanged.connect(self.sync_detection_controls_to_parent)
         self.auto_correct_btn.clicked.connect(self.auto_correct_drift)
         self.evaluate_btn.clicked.connect(self.evaluate_activation_success)
+        self.sync_detection_controls_to_parent()
 
         qc_main_layout.addWidget(content_box)
         layout.addWidget(qc_container_widget)
@@ -2305,6 +2324,12 @@ class DetectionPage(QWidget):
 
     def sync_summary_parameters(self):
         return
+
+    def sync_detection_controls_to_parent(self):
+        parent = self.parent()
+        if parent is not None:
+            parent.detection_method = self.eval_method_combo.currentText()
+            parent.detection_channel = self.detection_channel_combo.currentText()
 
     def log(self, message):
         self.log_area.append(translate_runtime_text(self.language, message))
@@ -3335,6 +3360,7 @@ class AdvancedCalibrationGUI(QWidget):
         self.roi_diameter = 10
         self.pyautogui_delay = 40 # 单位：ms
         self.detection_method = "Fold Increase"
+        self.detection_channel = "PAGFP"
         self.patch_size = 40
         self.set_alpha = 0.3
         self.set_gamma = 1.6
@@ -5245,18 +5271,6 @@ class AdvancedCalibrationGUI(QWidget):
         automation_grid.addWidget(position_test_frame, 5, 0, 1, 2)
         settings_layout.addWidget(automation_group)
 
-        detection_group, detection_grid = create_settings_group("检测")
-        self.detection_method_combo = GuardedComboBox()
-        self.detection_method_combo.addItems(["Fold Increase", "Difference"])
-        current_detection_method = getattr(self, "detection_method", "Fold Increase")
-        if hasattr(self, "detection_page") and hasattr(self.detection_page, "eval_method_combo"):
-            current_detection_method = self.detection_page.eval_method_combo.currentText()
-        detection_method_index = self.detection_method_combo.findText(current_detection_method)
-        if detection_method_index >= 0:
-            self.detection_method_combo.setCurrentIndex(detection_method_index)
-        add_setting_row(detection_grid, 0, "激活检测", self.detection_method_combo)
-        settings_layout.addWidget(detection_group)
-
         maintenance_group = QGroupBox(self.tr_text("维护操作"))
         maintenance_layout = QVBoxLayout(maintenance_group)
         maintenance_layout.setContentsMargins(10, 14, 10, 10)
@@ -5299,7 +5313,10 @@ class AdvancedCalibrationGUI(QWidget):
                 # 保存输入结果到 self
                 self.roi_diameter = int(self.roi_diameter_spin.value())
                 self.pyautogui_delay = int(self.delay_input.text())
-                self.detection_method = self.detection_method_combo.currentText()
+                if hasattr(self, "detection_page") and hasattr(self.detection_page, "eval_method_combo"):
+                    self.detection_method = self.detection_page.eval_method_combo.currentText()
+                if hasattr(self, "detection_page") and hasattr(self.detection_page, "detection_channel_combo"):
+                    self.detection_channel = self.detection_page.detection_channel_combo.currentText()
                 self.patch_size = int(self.patch_size_input.value())
                 self.set_sigma.setValue(float(self.settings_sigma_spin.value()))
                 self.max_matches_spin.setValue(int(self.settings_max_matches_spin.value()))
@@ -5320,10 +5337,7 @@ class AdvancedCalibrationGUI(QWidget):
                         if widget is not None:
                             widget.setValue(value)
                 if hasattr(self, "detection_page") and hasattr(self.detection_page, "eval_method_combo"):
-                    detection_method_index = self.detection_page.eval_method_combo.findText(self.detection_method)
-                    if detection_method_index >= 0:
-                        self.detection_page.eval_method_combo.setCurrentIndex(detection_method_index)
-                        self.detection_page.update_threshold_settings()
+                    self.detection_page.update_threshold_settings()
                 self.ifdenoise = self.enable_denoise_click_cb.isChecked()
                 self.autosave = self.enable_autosave_cb.isChecked()
                 desired_topmost = self.enable_topmost_cb.isChecked()
