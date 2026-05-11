@@ -1704,7 +1704,7 @@ class DetectionPage(QWidget):
             self.threshold_input.setRange(0.1, 20.0)
             self.threshold_input.setSingleStep(0.1)
             if self.threshold_input.value() == 0.0:
-                self.threshold_input.setValue(1.4)
+                self.threshold_input.setValue(1.3)
         else:
             self.threshold_label.setText("阈值(差值):")
             self.threshold_input.setRange(-255.0, 255.0)
@@ -2240,7 +2240,7 @@ class DetectionPage(QWidget):
         grid.addWidget(self.threshold_label, 3, 2)
         self.threshold_input = GuardedDoubleSpinBox()
         self.threshold_input.setDecimals(2)
-        self.threshold_input.setValue(1.4)
+        self.threshold_input.setValue(1.3)
         grid.addWidget(self.threshold_input, 3, 3)
 
         grid.addWidget(QLabel("X位移(Post)"), 4, 0)
@@ -2468,7 +2468,7 @@ class DetectionPage(QWidget):
             self.threshold_label.setText(self.tr_text("Fold Change阈值:"))
             self.threshold_input.setRange(0.1, 20.0)
             self.threshold_input.setSingleStep(0.1)
-            self.threshold_input.setValue(1.4)
+            self.threshold_input.setValue(1.3)
         else:
             self.threshold_label.setText(self.tr_text("阈值(差值):"))
             self.threshold_input.setRange(-255.0, 255.0)
@@ -2854,9 +2854,12 @@ class DetectionPage(QWidget):
 
     def get_roi_metrics_csv_path(self, method):
         metric_tag = "fold" if method == "Fold Increase" else "difference"
+        channel = getattr(self, "detection_channel_combo", None)
+        channel_tag = channel.currentText() if channel is not None else getattr(self.parent(), "detection_channel", "PAGFP")
+        channel_tag = re.sub(r"[^A-Za-z0-9_-]+", "_", channel_tag).strip("_") or "channel"
         base_dir = self.default_savepath or os.getcwd()
         base_name = self.iscell_name or "post_check"
-        return os.path.join(base_dir, f"{base_name}_post_check_{metric_tag}_roi_metrics.csv")
+        return os.path.join(base_dir, f"{base_name}_post_check_{channel_tag}_{metric_tag}_roi_metrics.csv")
 
     def save_roi_metrics_csv(self, method, roi_rows):
         csv_path = self.get_roi_metrics_csv_path(method)
@@ -5036,7 +5039,7 @@ class AdvancedCalibrationGUI(QWidget):
 
         self.roi_diameter_spin.setRange(1, 200)
         self.roi_diameter_spin.setValue(int(getattr(self, "roi_diameter", 10)))
-        self.delay_spin.setValue(0.0)
+        self.delay_spin.setValue(4.0)
         for spin in [self.start_spin, self.end_spin, self.roi_diameter_spin, self.delay_spin]:
             spin.setFixedWidth(80)
 
