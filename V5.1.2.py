@@ -3910,14 +3910,22 @@ class AdvancedCalibrationGUI(QWidget):
             font-weight: 600;
         }}
         QWidget#segmentedOptionControl QPushButton[segmentedButton="true"]:hover {{
-            background-color: #13202a;
-            color: {text};
+            background-color: transparent;
+            color: {muted};
         }}
         QWidget#segmentedOptionControl QPushButton[segmentedButton="true"]:checked {{
             background-color: {accent_soft};
             color: #f1fbff;
         }}
+        QWidget#segmentedOptionControl QPushButton[segmentedButton="true"]:checked:hover {{
+            background-color: {accent_soft};
+            color: #f1fbff;
+        }}
         QWidget#segmentedOptionControl QPushButton[segmentedButton="true"][optionValue="PAmCherry"]:checked {{
+            background-color: {warning_soft};
+            color: #fff7e6;
+        }}
+        QWidget#segmentedOptionControl QPushButton[segmentedButton="true"][optionValue="PAmCherry"]:checked:hover {{
             background-color: {warning_soft};
             color: #fff7e6;
         }}
