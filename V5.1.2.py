@@ -3921,10 +3921,6 @@ class AdvancedCalibrationGUI(QWidget):
             background-color: {warning_soft};
             color: #fff7e6;
         }}
-        QWidget#segmentedOptionControl QPushButton[segmentedButton="true"][optionValue="PAmCherry"]:hover {{
-            background-color: #5b4319;
-            color: #fff7e6;
-        }}
         QPushButton[role="primary"] {{
             background-color: {accent_soft};
             color: #f1fbff;
