@@ -757,6 +757,7 @@ class SegmentedOptionControl(QWidget):
         button = QPushButton(text)
         button.setCheckable(True)
         button.setProperty("segmentedButton", "true")
+        button.setProperty("optionValue", text)
         button.setMinimumHeight(32)
         button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         button.clicked.connect(lambda checked=False, i=index: self.setCurrentIndex(i))
@@ -2308,7 +2309,7 @@ class DetectionPage(QWidget):
         grid.addWidget(self.pre_activation_label, 1, 0, 1, 2)
         grid.addWidget(self.post_activation_label, 1, 2, 1, 2)
 
-        grid.addWidget(QLabel("激活检测"), 2, 0)
+        grid.addWidget(QLabel("方法"), 2, 0)
         grid.addWidget(self.eval_method_combo, 2, 1)
 
         grid.addWidget(QLabel("检测通道:"), 2, 2)
@@ -3915,6 +3916,14 @@ class AdvancedCalibrationGUI(QWidget):
         QWidget#segmentedOptionControl QPushButton[segmentedButton="true"]:checked {{
             background-color: {accent_soft};
             color: #f1fbff;
+        }}
+        QWidget#segmentedOptionControl QPushButton[segmentedButton="true"][optionValue="PAmCherry"]:checked {{
+            background-color: {warning_soft};
+            color: #fff7e6;
+        }}
+        QWidget#segmentedOptionControl QPushButton[segmentedButton="true"][optionValue="PAmCherry"]:hover {{
+            background-color: #5b4319;
+            color: #fff7e6;
         }}
         QPushButton[role="primary"] {{
             background-color: {accent_soft};
