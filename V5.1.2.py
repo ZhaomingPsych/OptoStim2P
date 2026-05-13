@@ -887,6 +887,9 @@ class InteractivePlotWindow(QWidget):
         layout.addWidget(QLabel(self.tr_text("热图颜色:")))
         self.cmap_combo = GuardedComboBox()
         self.cmap_combo.addItems(["inferno", "viridis", "hot", "coolwarm", "jet", "gray_r"])
+        gray_r_index = self.cmap_combo.findText("gray_r")
+        if gray_r_index >= 0:
+            self.cmap_combo.setCurrentIndex(gray_r_index)
         self.cmap_combo.currentIndexChanged.connect(self.update_plot)
         layout.addWidget(self.cmap_combo)
 
@@ -915,7 +918,7 @@ class InteractivePlotWindow(QWidget):
         self.vmin_spinbox = GuardedDoubleSpinBox()
         self.vmin_spinbox.setDecimals(3)
         self.vmin_spinbox.setRange(-1e9, 1e9)
-        self.vmin_spinbox.setValue(float(self.data["vmin"]))
+        self.vmin_spinbox.setValue(0.0)
         self.vmin_spinbox.valueChanged.connect(self.update_plot)
         layout.addWidget(self.vmin_spinbox)
 
@@ -923,7 +926,7 @@ class InteractivePlotWindow(QWidget):
         self.vmax_spinbox = GuardedDoubleSpinBox()
         self.vmax_spinbox.setDecimals(3)
         self.vmax_spinbox.setRange(-1e9, 1e9)
-        self.vmax_spinbox.setValue(float(self.data["vmax"]))
+        self.vmax_spinbox.setValue(5.0)
         self.vmax_spinbox.valueChanged.connect(self.update_plot)
         layout.addWidget(self.vmax_spinbox)
 
