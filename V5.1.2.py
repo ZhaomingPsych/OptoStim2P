@@ -1271,6 +1271,7 @@ class DetectionPage(QWidget):
         self.H = getattr(parent, "H", None)
         self.default_savepath = getattr(parent, "default_savepath", None)
         self.iscell_name = getattr(parent, "iscell_name", None)
+        self.iscell_path = getattr(parent, "iscell_path", None)
 
         parent_valid = getattr(parent, "valid", None)
         if parent_valid is not None:
@@ -1720,6 +1721,7 @@ class DetectionPage(QWidget):
             self.iscell_data = np.load(path, allow_pickle=True)
             self.default_savepath = os.path.dirname(path)
             self.iscell_name = os.path.splitext(os.path.basename(path))[0]
+            self.iscell_path = path
             self.post_iscell_label.setText(os.path.basename(path))
             self.post_iscell_label.setToolTip(path)
             self.context_source["iscell"] = "已加载"
@@ -2946,9 +2948,16 @@ class DetectionPage(QWidget):
         channel = getattr(self, "detection_channel_combo", None)
         channel_tag = channel.currentText() if channel is not None else getattr(self.parent(), "detection_channel", "PAGFP")
         channel_tag = re.sub(r"[^A-Za-z0-9_-]+", "_", channel_tag).strip("_") or "channel"
-        base_dir = self.default_savepath or os.getcwd()
+        if self.iscell_path:
+            base_dir = os.path.dirname(os.path.dirname(self.iscell_path))
+        elif self.default_savepath:
+            base_dir = os.path.dirname(self.default_savepath)
+        else:
+            base_dir = os.getcwd()
+        output_dir = os.path.join(base_dir, "output")
+        os.makedirs(output_dir, exist_ok=True)
         base_name = self.iscell_name or "post_check"
-        return os.path.join(base_dir, f"{base_name}_post_check_{channel_tag}_{metric_tag}_roi_metrics.csv")
+        return os.path.join(output_dir, f"{base_name}_post_check_{channel_tag}_{metric_tag}_roi_metrics.csv")
 
     def save_roi_metrics_csv(self, method, roi_rows):
         csv_path = self.get_roi_metrics_csv_path(method)
