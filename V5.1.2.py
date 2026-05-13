@@ -681,6 +681,13 @@ def center_window_on_parent(window, parent=None):
     window.move(x, y)
 
 
+def center_matplotlib_figure_on_parent(fig, parent=None):
+    manager = getattr(getattr(fig, "canvas", None), "manager", None)
+    window = getattr(manager, "window", None)
+    if window is not None:
+        center_window_on_parent(window, parent)
+
+
 class WheelFocusMixin:
     def _init_wheel_focus_guard(self):
         self.setFocusPolicy(Qt.StrongFocus)
@@ -2789,6 +2796,7 @@ class DetectionPage(QWidget):
             spine.set_color(self.theme["border"])
 
         plt.tight_layout()
+        center_matplotlib_figure_on_parent(fig, self)
         plt.show()
 
     def clearH(self):
@@ -6573,6 +6581,7 @@ class AdvancedCalibrationGUI(QWidget):
         ax.set_title("Correction Map")
         self.style_matplotlib_figure(fig)
         fig.tight_layout()
+        center_matplotlib_figure_on_parent(fig, self)
         plt.show()
 
     def reset_stimulated(self):
