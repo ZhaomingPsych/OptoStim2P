@@ -669,6 +669,18 @@ def get_app_icon():
     return QIcon()
 
 
+def center_window_on_parent(window, parent=None):
+    parent_window = parent.window() if parent is not None and hasattr(parent, "window") else None
+    reference = parent_window.frameGeometry() if parent_window is not None and parent_window.isVisible() else QApplication.primaryScreen().availableGeometry()
+    frame = window.frameGeometry()
+    frame.moveCenter(reference.center())
+    screen = QApplication.screenAt(frame.center()) or QApplication.primaryScreen()
+    available = screen.availableGeometry()
+    x = min(max(frame.x(), available.left()), max(available.left(), available.right() - frame.width() + 1))
+    y = min(max(frame.y(), available.top()), max(available.top(), available.bottom() - frame.height() + 1))
+    window.move(x, y)
+
+
 class WheelFocusMixin:
     def _init_wheel_focus_guard(self):
         self.setFocusPolicy(Qt.StrongFocus)
@@ -843,7 +855,8 @@ class InteractivePlotWindow(QWidget):
         )
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowTitle(self.tr_text("Post Check 详情图"))
-        self.setGeometry(150, 150, 1400, 760)
+        self.resize(1400, 760)
+        center_window_on_parent(self, parent)
 
         main_layout = QVBoxLayout(self)
         self.figure = Figure(figsize=(12, 6), facecolor=self.theme["bg"])
@@ -5051,6 +5064,7 @@ class AdvancedCalibrationGUI(QWidget):
         max_width = screen_size.width() * 0.86
         max_height = screen_size.height() * 0.86
         self.patch_win.resize(int(min(1280, max_width)), int(min(860, max_height)))
+        center_window_on_parent(self.patch_win, self)
 
         self.patch_win.canvas = canvas
         self.patch_win.fig = fig
@@ -5275,6 +5289,7 @@ class AdvancedCalibrationGUI(QWidget):
         dlg = QDialog(self)
         dlg.setWindowTitle(self.tr_text("更多设置"))
         dlg.resize(380, 680)
+        center_window_on_parent(dlg, self)
         layout = QVBoxLayout(dlg)
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(8)
@@ -5699,6 +5714,8 @@ class AdvancedCalibrationGUI(QWidget):
 
             self.style_matplotlib_figure(fig)
             fig.tight_layout(rect=[0, 0, 1, 0.96])
+            self.z_patch_win.resize(1200, 760)
+            center_window_on_parent(self.z_patch_win, self)
             self.z_patch_win.show()
         
         except Exception as e:
@@ -6048,6 +6065,7 @@ class AdvancedCalibrationGUI(QWidget):
         preview_label = self.suite2p_mask_preview_window.preview_label
         preview_label.setPixmap(pixmap.scaled(900, 900, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.suite2p_mask_preview_window.resize(940, 940)
+        center_window_on_parent(self.suite2p_mask_preview_window, self)
         self.suite2p_mask_preview_window.show()
         self.suite2p_mask_preview_window.raise_()
         self.suite2p_mask_preview_window.activateWindow()
